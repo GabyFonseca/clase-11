@@ -84,7 +84,7 @@ ols_robust = lm_robust(total_amount ~ trip_distance + passenger_count , data = d
 ols_robust %>% tidy(conf.int = TRUE)
 
 # replicar resultados de Stata
-ols_stata = lm_robust(total_amount ~ trip_distance + passenger_count , data = df_s , se_type = "stata")
+ols_stata = lm_robust(total_amount ~ trip_distance + passenger_count , data = df_s , se_type = "HC1")
 ols_stata %>% tidy(conf.int = TRUE)
 
 # Print the HAC VCOV

@@ -22,6 +22,7 @@ p_load(tidyverse, arrow, rio ,
 browseURL("https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page") # source
 browseURL("https://www1.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_green.pdf") # data dictionaries 
 df <- import("https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_2022-01.parquet")
+df <- janitor::clean_names(df) %>%.[,-1:-3]
 
 # trip_distance: The elapsed trip distance in miles reported by the taximeter
 # total_amount: The total amount charged to passengers. Does not include cash tips.
@@ -35,12 +36,22 @@ df <- import("https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_202
 
 # lm function
 ?lm
+lm(formula =total_amount ~ 1, data=df)
+lm(formula =total_amount ~ , data=df)
+lm(formula =total_amount ~ trip_distance + payment_type, data=df)
+lm(formula =total_amount ~ -1 + trip_distance + payment_type, data=df)
 
 
 # Linear regression
-
+ols = lm(formula =total_amount ~ trip_distance + as.factor(payment_type), data=df)
+ols
 
 # What is ols object?
+ols$qr
+ols$coefficients
+ols$residuals
+
+summary(ols)
 
 
 # get predict values
@@ -51,7 +62,7 @@ df <- import("https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_202
 #=================#
 
 # remover outlayers
-
+ols_credit = lm(total_amount ~ trip_distance, data=df,subset = payment_type==1)
 
 # subset data
 
@@ -83,7 +94,11 @@ df <- import("https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_202
 #==========================================#
 
 # categoricla variables
+df_2 =df %>% mutate(payment_type=factor(payment_type),
+                    trip_type=factor(trip_type),
+                    store_and_fwd_flag=factor(store_and_fwd_flag))
 
+df_3 = model.matrix(~.-1,data =df_2) %>% as_tibble()
 
 # include interaction terms
 cat("x1:x2 = x1 × x2")
